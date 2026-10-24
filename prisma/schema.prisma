@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+model Admin {
+  id String @id @default(cuid())
+  email String @unique
+  passwordHash String
+  sessions Session[]
+}
+model Session {
+  id String @id
+  adminId String
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  csrf String
+  expiresAt DateTime
+}
+model LoginAttempt {
+  id String @id @default(cuid())
+  key String
+  createdAt DateTime @default(now())
+  @@index([key, createdAt])
+}
+model Category {
+  id String @id @default(cuid())
+  name String @unique
+  items MenuItem[]
+}
+model MenuItem {
+  id String @id @default(cuid())
+  name String
+  description String @default("")
+  imageId String?
+  categoryId String
+  category Category @relation(fields:[categoryId], references:[id], onDelete: Restrict)
+  price Int?
+  kind String @default("NON_VEG")
+  available Boolean @default(false)
+  featured Boolean @default(false)
+  published Boolean @default(false)
+  demo Boolean @default(false)
+}
+model Image {
+  id String @id @default(cuid())
+  key String @unique
+  alt String
+  caption String @default("")
+  group String @default("Food")
+  gallery Boolean @default(false)
+  createdAt DateTime @default(now())
+}
+model Offer {
+  id String @id @default(cuid())
+  title String
+  description String
+  startsAt DateTime
+  endsAt DateTime
+  published Boolean @default(false)
+}
+model Settings {
+  id String @id @default("business")
+  phone String @default("+919342328311")
+  address String @default("SM Complex, 220/2A, Airport Mattuthavani Ring Rd, Santhosh Nagar, Avaniyapuram, Madurai, Tamil Nadu 625012")
+  addressConfirmed Boolean @default(false)
+  mapUrl String @default("https://www.google.com/maps/search/?api=1&query=Madurai+Express+SM+Complex+Avaniyapuram+Madurai")
+  mapConfirmed Boolean @default(false)
+  orderUrl String @default("")
+  hours Json?
+  whatsappEnabled Boolean @default(false)
+  whatsappNumber String @default("")
+}
