@@ -1,7 +1,8 @@
 import { db } from '@/lib/db';
 import { readImage } from '@/lib/storage';
 import { session } from '@/lib/auth';
-export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+import { illustrativePhoto } from '@/lib/menu-photos';
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const image = await db.image.findUnique({ where: { id } });
   if (!image) return new Response('Not found', { status: 404 });
@@ -11,6 +12,9 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   if (!image.gallery && !publicItem && !(await session()))
     return new Response('Not found', { status: 404 });
   try {
+    const builtin = illustrativePhoto(id);
+    if (builtin && image.key === `builtin/${id}`)
+      return Response.redirect(new URL(builtin, request.url));
     const file = await readImage(image.key);
     return new Response(new Uint8Array(await file.Body!.transformToByteArray()).buffer, {
       headers: {

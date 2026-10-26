@@ -58,6 +58,12 @@ Preview photographs are served from Unsplash under the [Unsplash License](https:
 
 Replace them with approved owner photographs. No reference-site, listing or delivery-platform photographs are used.
 
+### Publish all existing drafts (owner requested)
+
+After setting `DATABASE_URL` privately to the same hosted database used by Vercel, run `npm run menu:publish` for a count without changes, then `npm run menu:publish -- --apply` to publish every existing draft. This does not seed missing dishes. It clears the draft demonstration flag as explicitly requested by the owner, keeps prices/classification/availability and existing images unchanged, and replaces the original seed placeholder description with an enquiry prompt. Previously published items are unchanged. All writes are atomic.
+
+Drafts without photos receive one of the three bundled licensed illustrative stock photographs above (biryani, dosa or meal), reused across categories. These are representative images, not 60 distinct dish photographs. Public cards always label them “Illustrative photo · not the actual dish”. These are explicit persisted selections, not a production demo fallback. They require no S3 configuration; owner uploads still use durable S3 storage and can replace them through admin. Do not mark built-in illustrative images as restaurant gallery photographs. Run this only after deploying the corresponding image-rendering code. Running against local PostgreSQL does not update the live website.
+
 ## Image storage and production configuration
 
 Local MinIO runs at http://localhost:9000, with its console at http://localhost:9001. `storage:setup` creates the configured private bucket. Configure `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY` and `S3_SECRET_KEY` for your durable S3-compatible provider. Use a dedicated least-privilege storage identity with object read/write permissions for this bucket. The setup command additionally needs bucket creation/check access; pre-create the bucket if using a restricted runtime identity.

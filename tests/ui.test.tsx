@@ -2,10 +2,21 @@
 import React from 'react';
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, cleanup, waitFor, act } from '@testing-library/react';
-import { Header, MenuBrowser, Gallery, FoodPhoto } from '../components/site';
+import { Header, MenuBrowser, Gallery, FoodPhoto, DishCard } from '../components/site';
 import { BrandArtwork, BrandBanner } from '../components/brand-art';
 import { Reveals } from '../components/reveals';
 import { defaultSettings, demoDishes, categories } from '../lib/content';
+it('labels an explicitly selected illustrative photo on a published dish', () => {
+  render(<DishCard dish={{ ...demoDishes[0], demo: false, imageId: 'illustrative-biryani' }} />);
+  expect(screen.getByText('Illustrative photo · not the actual dish')).toBeTruthy();
+  expect(
+    screen
+      .getByAltText('Illustrative stock food photograph, not the actual dish')
+      .getAttribute('src'),
+  ).toBe('/demo-biryani.jpg');
+  expect(screen.getByText('Enquire for price')).toBeTruthy();
+  expect(screen.getByText('Unavailable')).toBeTruthy();
+});
 vi.mock('next/navigation', () => ({
   usePathname: () => '/menu',
   useSearchParams: () => new URLSearchParams(),

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import { defaultSettings, Dish, filterDishes, stock } from '@/lib/content';
+import { illustrativePhoto } from '@/lib/menu-photos';
 type Settings = Omit<typeof defaultSettings, 'hours'> & { hours: unknown };
 export function Order({ url }: { url: string }) {
   if (!url) return null;
@@ -217,12 +218,14 @@ export function FoodPhoto({
   );
 }
 export function DishCard({ dish }: { dish: Dish }) {
+  const samplePhoto = illustrativePhoto(dish.imageId);
   return (
     <article className="dish-card reveal">
       <FoodPhoto
         steam
         src={
-          dish.imageId
+          samplePhoto ??
+          (dish.imageId
             ? '/api/images/' + dish.imageId
             : dish.demo
               ? dish.category.name === 'Dosai'
@@ -230,11 +233,16 @@ export function DishCard({ dish }: { dish: Dish }) {
                 : dish.category.name === 'South Indian'
                   ? stock.meal
                   : stock.hero
-              : '/placeholder.svg'
+              : '/placeholder.svg')
         }
-        alt={dish.demo ? 'Stock food photograph — not the restaurant’s dish' : dish.name}
+        alt={
+          samplePhoto || dish.demo
+            ? 'Illustrative stock food photograph, not the actual dish'
+            : dish.name
+        }
       />
       <div className="dish-content">
+        {samplePhoto && <small>Illustrative photo · not the actual dish</small>}
         <div className="card-top">
           <span
             className={'diet ' + (dish.kind === 'VEG' ? 'veg' : 'nonveg')}

@@ -14,6 +14,7 @@
     "db:migrate": "prisma migrate deploy",
     "db:seed": "tsx scripts/seed.ts",
     "admin:setup": "tsx scripts/admin.ts",
+    "menu:publish": "tsx scripts/publish-menu.ts",
     "storage:setup": "tsx scripts/storage.ts",
     "db:local": "tsx scripts/local-db.ts",
     "storage:local": "tsx scripts/local-storage.ts",
