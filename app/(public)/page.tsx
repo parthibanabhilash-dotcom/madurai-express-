@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { BrandArtwork, BrandBanner } from '@/components/brand-art';
 import { Hours } from '@/components/hours';
 import { publicData } from '@/lib/data';
 import { categories, stock } from '@/lib/content';
@@ -74,27 +75,36 @@ export default async function Home() {
           </div>
         </div>
         <div className="hero-visual">
-          <FoodPhoto
-            priority
-            src={heroImage ? '/api/images/' + heroImage.id : demo ? stock.hero : '/placeholder.svg'}
-            alt={
-              heroImage
-                ? heroImage.alt
-                : demo
-                  ? 'Demonstration stock photograph of biryani'
-                  : 'Restaurant photography awaiting owner approval'
-            }
-          />
-          <div className="image-label">
-            {demo && !heroImage ? 'BIRYANI · STOCK PHOTO' : 'SOUTH INDIAN DINING · MADURAI'}
-          </div>
-          <div className="round-note">
-            BIG
-            <br />
-            <b>MADURAI</b>
-            <br />
-            FLAVOURS ↗
-          </div>
+          {heroImage || demo ? (
+            <>
+              <FoodPhoto
+                steam={Boolean(heroImage) || demo}
+                priority
+                src={
+                  heroImage ? '/api/images/' + heroImage.id : demo ? stock.hero : '/placeholder.svg'
+                }
+                alt={
+                  heroImage
+                    ? heroImage.alt
+                    : demo
+                      ? 'Demonstration stock photograph of biryani'
+                      : 'Restaurant photography awaiting owner approval'
+                }
+              />
+              <div className="image-label">
+                {demo && !heroImage ? 'BIRYANI · STOCK PHOTO' : 'SOUTH INDIAN DINING · MADURAI'}
+              </div>
+              <div className="round-note">
+                BIG
+                <br />
+                <b>MADURAI</b>
+                <br />
+                FLAVOURS ↗
+              </div>
+            </>
+          ) : (
+            <BrandArtwork className="hero-brand-artwork" priority />
+          )}
         </div>
       </section>
       <div className="ticker" aria-hidden="true">
@@ -144,6 +154,7 @@ export default async function Home() {
           </div>
         </section>
       )}
+      <BrandBanner />
       <section className="story section">
         <div className="story-art">
           <span>வணக்கம்</span>
@@ -188,7 +199,7 @@ export default async function Home() {
           <div className="gallery-grid">
             {images.slice(0, 3).map((im) => (
               <Link href="/gallery" key={im.id}>
-                <FoodPhoto src={'/api/images/' + im.id} alt={im.alt} />
+                <FoodPhoto src={'/api/images/' + im.id} alt={im.alt} steam={im.group === 'Food'} />
               </Link>
             ))}
           </div>
@@ -197,7 +208,11 @@ export default async function Home() {
             <div className="gallery-grid">
               {[stock.hero, stock.dosa, stock.meal].map((src, i) => (
                 <Link href="/gallery" key={src}>
-                  <FoodPhoto src={src} alt={'Demonstration stock food photograph ' + (i + 1)} />
+                  <FoodPhoto
+                    src={src}
+                    alt={'Demonstration stock food photograph ' + (i + 1)}
+                    steam
+                  />
                 </Link>
               ))}
             </div>

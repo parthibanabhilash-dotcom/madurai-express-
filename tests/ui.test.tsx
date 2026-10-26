@@ -1,8 +1,10 @@
 // @vitest-environment happy-dom
 import React from 'react';
 import { afterEach, describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
-import { Header, MenuBrowser, Gallery } from '../components/site';
+import { render, screen, fireEvent, cleanup, waitFor, act } from '@testing-library/react';
+import { Header, MenuBrowser, Gallery, FoodPhoto } from '../components/site';
+import { BrandArtwork, BrandBanner } from '../components/brand-art';
+import { Reveals } from '../components/reveals';
 import { defaultSettings, demoDishes, categories } from '../lib/content';
 vi.mock('next/navigation', () => ({
   usePathname: () => '/menu',
@@ -17,13 +19,20 @@ vi.mock('next/image', () => ({
   default: ({
     fill,
     priority,
+    preload,
     sizes,
     ...props
-  }: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean }) => (
-    <img {...props} />
-  ),
+  }: React.ImgHTMLAttributes<HTMLImageElement> & {
+    fill?: boolean;
+    priority?: boolean;
+    preload?: boolean;
+  }) => <img {...props} />,
 }));
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 describe('public interactions', () => {
   it('opens and closes mobile navigation with Escape and restores focus', () => {
     render(<Header settings={defaultSettings} />);
@@ -97,5 +106,94 @@ describe('public interactions', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close image' }));
     await waitFor(() => expect(dialog.open).toBe(false));
     expect(document.activeElement).toBe(opener);
+  });
+});
+
+describe('motion and supplied artwork', () => {
+  function viewportMock() {
+    let enter: (entries: { target?: Element; isIntersecting: boolean }[]) => void = () => {};
+    const observe = vi.fn(),
+      unobserve = vi.fn(),
+      disconnect = vi.fn();
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(callback: typeof enter) {
+          enter = callback;
+        }
+        observe = observe;
+        unobserve = unobserve;
+        disconnect = disconnect;
+      },
+    );
+    const motion = { matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() };
+    vi.spyOn(window, 'matchMedia').mockReturnValue(motion as unknown as MediaQueryList);
+    return {
+      enter: (entries: Parameters<typeof enter>[0]) => act(() => enter(entries)),
+      observe,
+      unobserve,
+      disconnect,
+      motion,
+    };
+  }
+  it('runs decorative steam only on visible food photos and stops for reduced motion', () => {
+    const viewport = viewportMock();
+    vi.spyOn(document, 'hidden', 'get').mockReturnValue(false);
+    const { container } = render(<FoodPhoto src="/food.jpg" alt="Owner-approved food" steam />);
+    const photo = container.querySelector('.food-photo')!;
+    expect(photo.getAttribute('data-steaming')).toBeNull();
+    viewport.enter([{ isIntersecting: true }]);
+    expect(photo.getAttribute('data-steaming')).toBe('true');
+    viewport.enter([{ isIntersecting: false }]);
+    expect(photo.getAttribute('data-steaming')).toBeNull();
+    viewport.enter([{ isIntersecting: true }]);
+    viewport.motion.matches = true;
+    act(() => viewport.motion.addEventListener.mock.calls[0][1]());
+    expect(photo.getAttribute('data-steaming')).toBeNull();
+    expect(container.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+  });
+  it('uses both full artwork assets without steam or cropping and excludes placeholders from steam', () => {
+    const { container } = render(
+      <>
+        <BrandArtwork />
+        <BrandBanner />
+        <FoodPhoto src="/placeholder.svg" alt="Photo pending" steam />
+      </>,
+    );
+    expect(screen.getByAltText(/temple and road logo/).getAttribute('src')).toBe(
+      '/madurai-express-logo.png',
+    );
+    expect(screen.getByAltText(/yellow banner/).getAttribute('src')).toBe(
+      '/madurai-express-banner.png',
+    );
+    expect(screen.getByRole('link', { name: /View full banner/ }).getAttribute('href')).toBe(
+      '/madurai-express-banner.png',
+    );
+    expect(container.querySelector('.photo-steam')).toBeNull();
+  });
+  it('reveals sections on entry, observes newly filtered cards, and cancels for reduced motion', async () => {
+    const viewport = viewportMock();
+    render(
+      <main id="main">
+        <div className="category">Section content</div>
+        <Reveals />
+      </main>,
+    );
+    const target = screen.getByText('Section content');
+    const cancel = vi.fn();
+    const animate = vi.fn(
+      () => ({ finished: new Promise(() => {}), cancel }) as unknown as Animation,
+    );
+    target.animate = animate;
+    viewport.enter([{ target, isIntersecting: true }]);
+    expect(animate).toHaveBeenCalledOnce();
+    expect(viewport.unobserve).toHaveBeenCalledWith(target);
+    const fresh = document.createElement('article');
+    fresh.className = 'dish-card';
+    document.getElementById('main')!.append(fresh);
+    await waitFor(() => expect(viewport.observe).toHaveBeenCalledWith(fresh));
+    viewport.motion.matches = true;
+    act(() => viewport.motion.addEventListener.mock.calls[0][1]());
+    expect(cancel).toHaveBeenCalledOnce();
   });
 });

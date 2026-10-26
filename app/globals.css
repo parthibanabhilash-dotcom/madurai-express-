@@ -136,14 +136,63 @@ p {
   transition: box-shadow 0.25s;
 }
 .wordmark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   font-size: 24px;
   font-weight: 900;
   letter-spacing: -1.2px;
   line-height: 1;
   white-space: nowrap;
 }
-.wordmark > span {
+.wordmark .brand-name {
   color: var(--red);
+}
+.header-logo {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.brand-artwork {
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--yellow);
+  line-height: 0;
+}
+.brand-artwork img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.brand-banner {
+  max-width: 1440px;
+  width: 90%;
+  margin: 20px auto 0;
+}
+.brand-banner > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+  object-fit: contain;
+  background: var(--yellow);
+}
+.brand-banner figcaption {
+  padding: 10px 2px;
+  text-align: right;
+  font-size: 11px;
+  color: var(--muted);
+}
+.brand-banner a {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .brand-dot {
   color: #b58b00;
@@ -1011,23 +1060,51 @@ footer a {
   object-fit: cover;
   border-radius: 10px;
 }
-.reveal {
-  animation: reveal 0.4s both;
+.photo-steam {
+  position: absolute;
+  left: 18%;
+  bottom: 15%;
+  width: 64%;
+  height: 73%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+  filter: blur(0.7px);
 }
-.dish-card:nth-child(2) {
-  animation-delay: 60ms;
+.steam-wisp {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 3.3;
+  stroke-linecap: round;
+  opacity: 0;
+  animation: food-steam 4.8s ease-in-out infinite;
+  animation-play-state: paused;
+  transform-origin: 50% 80%;
 }
-.dish-card:nth-child(3) {
-  animation-delay: 120ms;
+.steam-wisp:nth-child(2) {
+  animation-delay: -1.6s;
+  stroke-width: 4.2;
 }
-@keyframes reveal {
-  from {
-    opacity: 0.2;
-    transform: translateY(12px);
+.steam-wisp:nth-child(3) {
+  animation-delay: -3.2s;
+}
+[data-steaming='true'] .steam-wisp {
+  animation-play-state: running;
+}
+@keyframes food-steam {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scaleX(0.85);
   }
-  to {
-    opacity: 1;
-    transform: none;
+  25% {
+    opacity: 0.4;
+  }
+  65% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-25px) scaleX(1.08);
   }
 }
 @media (min-width: 1600px) {
@@ -1077,6 +1154,10 @@ footer a {
   }
 }
 @media (max-width: 800px) {
+  .header-logo {
+    width: 50px;
+    height: 50px;
+  }
   body {
     padding-bottom: calc(73px + env(safe-area-inset-bottom));
   }
@@ -1280,6 +1361,19 @@ footer a {
   }
 }
 @media (max-width: 580px) {
+  .header-logo {
+    width: 42px;
+    height: 42px;
+  }
+  .wordmark {
+    gap: 8px;
+  }
+  .brand-banner {
+    margin-top: 12px;
+  }
+  .brand-banner > img {
+    border-radius: 12px;
+  }
   .header-actions .button {
     font-size: 10px;
     gap: 7px;
@@ -1446,6 +1540,9 @@ footer a {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .photo-steam {
+    display: none;
+  }
   html {
     scroll-behavior: auto;
   }

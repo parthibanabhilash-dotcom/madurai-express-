@@ -31,11 +31,21 @@ export function Header({ settings }: { settings: Settings }) {
     <>
       <header className={scrolled ? 'header scrolled' : 'header'}>
         <Link className="wordmark" href="/">
-          MADURAI{' '}
-          <span>
-            EXPRESS<span className="brand-dot">.</span>
+          <Image
+            className="header-logo"
+            src="/madurai-express-logo.png"
+            width={64}
+            height={64}
+            alt=""
+            loading="eager"
+          />
+          <span className="wordmark-copy">
+            MADURAI{' '}
+            <span className="brand-name">
+              EXPRESS<span className="brand-dot">.</span>
+            </span>
+            <small>AVANIYAPURAM • MADURAI</small>
           </span>
-          <small>AVANIYAPURAM • MADURAI</small>
         </Link>
         <nav
           id="main-navigation"
@@ -144,14 +154,44 @@ export function FoodPhoto({
   alt,
   priority = false,
   className = '',
+  steam = false,
 }: {
   src?: string;
   alt: string;
   priority?: boolean;
   className?: string;
+  steam?: boolean;
 }) {
+  const photoRef = useRef<HTMLDivElement>(null);
+  const [steaming, setSteaming] = useState(false);
+  const canSteam = steam && src !== '/placeholder.svg';
+  useEffect(() => {
+    if (!canSteam || !photoRef.current || !('IntersectionObserver' in window)) return;
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let visible = false;
+    const update = () => setSteaming(visible && !document.hidden && !motion.matches);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        update();
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(photoRef.current);
+    document.addEventListener('visibilitychange', update);
+    motion.addEventListener('change', update);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', update);
+      motion.removeEventListener('change', update);
+    };
+  }, [canSteam, src]);
   return (
-    <div className={'food-photo ' + className}>
+    <div
+      ref={photoRef}
+      className={'food-photo ' + className}
+      data-steaming={steaming ? 'true' : undefined}
+    >
       <Image
         src={src}
         alt={alt}
@@ -160,6 +200,19 @@ export function FoodPhoto({
         priority={priority}
         style={{ objectFit: 'cover' }}
       />
+      {canSteam && (
+        <svg className="photo-steam" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+          <g className="steam-wisp">
+            <path d="M28 87 C14 70 41 61 29 44 C19 30 34 19 30 8" />
+          </g>
+          <g className="steam-wisp">
+            <path d="M51 94 C37 76 64 63 51 46 C39 30 58 17 52 5" />
+          </g>
+          <g className="steam-wisp">
+            <path d="M74 87 C60 69 86 57 74 42 C64 29 79 16 73 7" />
+          </g>
+        </svg>
+      )}
     </div>
   );
 }
@@ -167,6 +220,7 @@ export function DishCard({ dish }: { dish: Dish }) {
   return (
     <article className="dish-card reveal">
       <FoodPhoto
+        steam
         src={
           dish.imageId
             ? '/api/images/' + dish.imageId
@@ -322,7 +376,11 @@ export function Gallery({ images }: { images: GalleryImage[] }) {
               setSelected(i);
             }}
           >
-            <FoodPhoto src={im.src ?? '/api/images/' + im.id} alt={im.alt} />
+            <FoodPhoto
+              src={im.src ?? '/api/images/' + im.id}
+              alt={im.alt}
+              steam={im.group === 'Food'}
+            />
             <span>
               {im.caption || im.alt} <b aria-hidden>↗</b>
             </span>

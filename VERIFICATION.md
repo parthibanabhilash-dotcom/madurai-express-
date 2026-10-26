@@ -1,5 +1,13 @@
 # Local verification
 
+## Supplied artwork and motion — 26 October 2026
+
+Integrated both user-provided PNGs unchanged (original dimensions: logo 1254 × 1254; banner 2070 × 760). Source/destination SHA-256 checksums match. Images use explicit dimensions, responsive Next.js optimization and contain sizing; the full banner remains available as an accessible original-image link. The user explicitly approved keeping both images as-is, including the banner's existing courier-related text.
+
+Added viewport-triggered section/card reveals, dynamic-card observation, staggered entries and decorative food steam. Steam pauses off-screen/when the tab is hidden, and is disabled for reduced motion. Artwork, placeholders and non-food imagery are excluded. Regression coverage includes observer entry/exit, dynamic card observation, motion cancellation, original asset references and no steam on branding/placeholders. Browser surfaces remain unavailable, so pixel-level and actual animated appearance checks remain unverified.
+
+Checks passed: TypeScript, production build, 26 behavior/UI/deployment tests, all public HTTP routes and anonymous admin protection with no production database configured. Original asset HTTP responses matched source bytes, both artworks appeared on Home/About, and the Next.js optimized banner endpoint returned an image successfully. Production demo restrictions remain in force: the steam effect applies when real food images are available (and to explicitly labelled local demos), not to invented live menu imagery.
+
 ## Vercel availability fix — 26 October 2026
 
 The reported live deployment returned HTTP 500 and a localhost canonical URL. Exact provider-side database error remains unconfirmed without private runtime logs. Code inspection identified that any production database error crashed every public route, and Prisma client generation was not explicitly part of the build.

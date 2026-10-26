@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { BrandArtwork, BrandBanner } from '@/components/brand-art';
 export const metadata = {
   title: 'About',
   description: 'Meet MADURAI EXPRESS, a restaurant in Avaniyapuram, Madurai.',
@@ -16,16 +17,9 @@ export default function About() {
         </h1>
         <p>Welcome to MADURAI EXPRESS in Avaniyapuram, Madurai.</p>
       </section>
+      <BrandBanner />
       <section className="section about-grid">
-        <div className="story-art">
-          <span>வணக்கம்</span>
-          <h2>
-            MADURAI
-            <br />
-            EXPRESS.
-          </h2>
-          <p>SOUTH INDIAN · BIRYANI · FAST FOOD</p>
-        </div>
+        <BrandArtwork />
         <div>
           <p className="eyebrow">FOOD THAT BRINGS US TOGETHER</p>
           <h2>
