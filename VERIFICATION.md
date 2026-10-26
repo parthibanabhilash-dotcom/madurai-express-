@@ -1,5 +1,13 @@
 # Local verification
 
+## Vercel availability fix — 26 October 2026
+
+The reported live deployment returned HTTP 500 and a localhost canonical URL. Exact provider-side database error remains unconfirmed without private runtime logs. Code inspection identified that any production database error crashed every public route, and Prisma client generation was not explicitly part of the build.
+
+Fixed: public queries now return only known contact/location defaults and a clear live-menu-unavailable notice when the database is missing/unreachable. Production never enables demo data. Queries are deduplicated within each render; error logs expose only a diagnostic code/name. Prisma generation runs during installation/build. Canonical URLs, sitemap, robots and origin checks use configured/Vercel domains. Hosted PostgreSQL and migrations remain required for admin workflows; see VERCEL_SETUP.md.
+
+Validated: TypeScript, optimized build, 23 behavior/UI/deployment regression tests and 9 PostgreSQL/S3 integration tests (**32 total**). Ran production HTTP checks against both a healthy database and an explicitly missing DATABASE_URL with DEMO_PREVIEW=true: five public routes, sitemap and robots returned 200, anonymous admin remained protected, outage notice appeared only during the outage, no demo content leaked, and the homepage canonical used the Vercel domain.
+
 ## Madurai Express update
 
 The site has been rebranded to MADURAI EXPRESS from the user-supplied Google share link. Public/admin wordmarks, titles, descriptions, structured data, placeholder artwork, phone and map search have been updated. Yellow is now #FFD21C and red is #B82025; the green brand palette was removed. The exact signage yellow remains an approximation pending an approved logo/photo.

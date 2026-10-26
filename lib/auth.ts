@@ -3,6 +3,7 @@ import { cookies, headers } from 'next/headers';
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { db } from './db';
 import { redirect } from 'next/navigation';
+import { siteUrl } from './site-url';
 export const token = () => randomBytes(32).toString('hex');
 export const hash = (s: string) => createHash('sha256').update(s).digest('hex');
 export async function session() {
@@ -29,8 +30,7 @@ export async function checkMutation(form: FormData) {
 }
 export async function checkOrigin() {
   const h = await headers();
-  if (h.get('origin') !== new URL(process.env.APP_URL ?? 'http://localhost:3000').origin)
-    throw new InputError('Request origin rejected');
+  if (h.get('origin') !== siteUrl()) throw new InputError('Request origin rejected');
 }
 export async function consumeLoginAttempt(key: string) {
   return db.$transaction(async (tx) => {

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
+import { siteUrl } from '@/lib/site-url';
 export default function sitemap(): MetadataRoute.Sitemap {
   return ['', '/menu', '/about', '/gallery', '/contact'].map((path) => ({
-    url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}${path}`,
+    url: `${siteUrl()}${path}`,
   }));
 }

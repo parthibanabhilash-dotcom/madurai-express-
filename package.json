@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run tests/core.test.ts tests/ui.test.tsx",
+    "test": "vitest run tests/core.test.ts tests/ui.test.tsx tests/deployment.test.ts",
     "test:integration": "vitest run tests/integration.test.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
@@ -18,7 +18,8 @@
     "db:local": "tsx scripts/local-db.ts",
     "storage:local": "tsx scripts/local-storage.ts",
     "test:smoke": "tsx scripts/smoke.ts",
-    "business:rebrand": "tsx scripts/rebrand.ts"
+    "business:rebrand": "tsx scripts/rebrand.ts",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",

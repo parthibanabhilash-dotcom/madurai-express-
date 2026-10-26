@@ -4,6 +4,8 @@ Local-only restaurant website and administration application. Next.js App Router
 
 ## Local setup
 
+For Vercel environment variables, hosted database initialization and runtime-error troubleshooting, see [VERCEL_SETUP.md](VERCEL_SETUP.md). Public pages now remain available during database setup/outages with a clear live-menu notice; admin still requires hosted PostgreSQL.
+
 Requirements: Node.js 22 or 24 and Docker Desktop with Compose. In Windows PowerShell use `npm.cmd` and `npx.cmd` if script execution policy blocks `npm`.
 
 ```sh
@@ -46,7 +48,7 @@ Opening hours remain unconfigured until confirmed. In Settings, enable “Hours 
 
 `db:seed` creates business defaults, six categories and eight **draft, unconfirmed, demo** dish records. It never adds prices, availability, approved photography, hours or offers. It does not overwrite existing records.
 
-`DEMO_PREVIEW=true` enables clearly labelled demonstration content only when `NODE_ENV` is not `production`. If no published menu exists, the local preview displays provisional dishes; it is not a verified restaurant menu. The demo flag cannot be published by server validation. Convert a draft to a real item only after owner confirmation, clear its demo flag, confirm its classification and availability, then publish it. Production contains no stock-photo fallback and no demo items, even if `DEMO_PREVIEW=true` was accidentally retained. Production database failures are surfaced rather than replaced by demonstration content.
+`DEMO_PREVIEW=true` enables clearly labelled demonstration content only when `NODE_ENV` is not `production`. If no published menu exists, the local preview displays provisional dishes; it is not a verified restaurant menu. The demo flag cannot be published by server validation. Convert a draft to a real item only after owner confirmation, clear its demo flag, confirm its classification and availability, then publish it. Production contains no stock-photo fallback and no demo items, even if `DEMO_PREVIEW=true` was accidentally retained. Production database failures show a clear live-menu notice and known contact/location information; they never enable demonstration content.
 
 Preview photographs are served from Unsplash under the [Unsplash License](https://unsplash.com/license). They depict stock food, not this restaurant or its actual dishes. Sources:
 
