@@ -37,3 +37,13 @@ Redeploy after changing Vercel environment variables; existing deployments do no
 - A Prisma client initialization/build error: confirm the Vercel Build Command uses `npm run build`, which generates the client first.
 
 If the public status notice remains after redeployment, the database is still unconfigured/unreachable or needs migrations. Check Vercel Runtime Logs. Upload failures additionally require checking hosted S3 credentials, endpoint and bucket permissions.
+# Photo uploads without AWS/R2
+
+Set the Production environment variable `IMAGE_STORAGE` to `database`. This stores compressed photos in the existing PostgreSQL database; provider quotas still apply. Apply the new migrations before uploads. If your Vercel Build Command already runs `npm run db:migrate`, redeploy after adding the variable. Otherwise, use:
+
+```sh
+DATABASE_URL="$DATABASE_URL_UNPOOLED" npm run db:migrate && npm run build
+```
+
+This command requires a real `DATABASE_URL_UNPOOLED` value. Keep the normal `DATABASE_URL` configured for runtime. Never paste database credentials into chat. Re-upload the photo in Admin → Menu after deployment completes. Old failed uploads do not contain recoverable bytes.
+

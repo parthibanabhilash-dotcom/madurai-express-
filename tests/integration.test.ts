@@ -300,6 +300,61 @@ describe.skipIf(!enabled)('PostgreSQL-backed admin workflows', () => {
       }
     },
   );
+  it('stores a device photo durably in PostgreSQL without an S3 account', async () => {
+    vi.stubEnv('IMAGE_STORAGE', 'database');
+    const sharp = (await import('sharp')).default;
+    const { readImage } = await import('../lib/storage');
+    const bytes = await sharp({
+      create: { width: 160, height: 160, channels: 3, background: 'yellow' },
+    })
+      .png()
+      .toBuffer();
+    let id = '',
+      imageId = '',
+      key = '';
+    try {
+      const f = form('item', {
+        name: 'Database photo test',
+        description: '',
+        categoryId,
+        kind: 'VEG',
+        published: 'on',
+      });
+      f.set('dishPhoto', new File([new Uint8Array(bytes)], 'dish.png', { type: 'image/png' }));
+      expect((await actions.mutate({}, f)).success).toBeTruthy();
+      const item = await db.menuItem.findFirstOrThrow({
+        where: { name: 'Database photo test', categoryId },
+      });
+      id = item.id;
+      imageId = item.imageId!;
+      const image = await db.image.findUniqueOrThrow({ where: { id: imageId } });
+      key = image.key;
+      expect(key.startsWith('database/')).toBe(true);
+      const stored = await readImage(key);
+      expect((await sharp(await stored.Body!.transformToByteArray()).metadata()).format).toBe(
+        'webp',
+      );
+      runtime.cookies.clear();
+      const { GET } = await import('../app/api/images/[id]/route');
+      const response = await GET(new Request('http://localhost/api/images/' + imageId), {
+        params: Promise.resolve({ id: imageId }),
+      });
+      expect(response.status).toBe(200);
+      runtime.cookies.set('mm_session', rawSession);
+      await db.menuItem.delete({ where: { id } });
+      id = '';
+      expect(
+        (await actions.mutate({}, form('delete-image', { id: imageId }))).success,
+      ).toBeTruthy();
+      expect(await db.imageObject.findUnique({ where: { key } })).toBeNull();
+    } finally {
+      runtime.cookies.set('mm_session', rawSession);
+      if (id) await db.menuItem.deleteMany({ where: { id } });
+      if (imageId) await db.image.deleteMany({ where: { id: imageId } });
+      if (key) await db.imageObject.deleteMany({ where: { key } });
+      vi.unstubAllEnvs();
+    }
+  });
   it('authenticates, creates opaque session, logs out and rejects expired session', async () => {
     runtime.cookies.set('mm_login_csrf', 'login-csrf');
     const f = form('', { email, password, csrf: 'login-csrf' });

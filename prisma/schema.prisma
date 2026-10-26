@@ -52,6 +52,12 @@ model Image {
   gallery Boolean @default(false)
   createdAt DateTime @default(now())
 }
+model ImageObject {
+  key String @id
+  data Bytes
+  size Int
+  createdAt DateTime @default(now())
+}
 model Offer {
   id String @id @default(cuid())
   title String

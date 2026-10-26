@@ -104,7 +104,7 @@ export async function mutate(_: Result, form: FormData): Promise<Result> {
         } catch (error) {
           if (error instanceof InputError) throw error;
           throw new InputError(
-            'Photo upload failed. Check the S3 image-storage settings and try again. Your dish was not changed.',
+            'Photo upload failed. Check image-storage configuration and database migrations. Your dish was not changed.',
           );
         }
       }
@@ -153,7 +153,11 @@ export async function mutate(_: Result, form: FormData): Promise<Result> {
     } else if (action === 'delete-image') {
       if (await db.menuItem.count({ where: { imageId: id } }))
         throw new InputError('Remove this image from menu items first.');
-      await db.image.delete({ where: { id } });
+      await db.$transaction(async (tx) => {
+        const image = await tx.image.delete({ where: { id } });
+        if (image.key.startsWith('database/'))
+          await tx.imageObject.deleteMany({ where: { key: image.key } });
+      });
     } else if (action === 'settings') {
       const whatsappEnabled = yes(form, 'whatsappEnabled');
       const whatsappNumber = str(form, 'whatsappNumber');
