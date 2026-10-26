@@ -4,6 +4,7 @@ import { Hours } from '@/components/hours';
 import { publicData } from '@/lib/data';
 import { categories, stock } from '@/lib/content';
 import { DishCard, FoodPhoto, Order } from '@/components/site';
+import { AnimatedText } from '@/components/animated-text';
 export const metadata = { alternates: { canonical: '/' } };
 export default async function Home() {
   const {
@@ -42,9 +43,11 @@ export default async function Home() {
             <span /> AVANIYAPURAM, MADURAI
           </div>
           <h1>
-            Madurai flavours.
+            <AnimatedText text="Madurai flavours." />
             <br />
-            <em>Full-on taste.</em>
+            <em>
+              <AnimatedText text="Full-on taste." />
+            </em>
           </h1>
           <p>
             Discover South Indian dining at MADURAI EXPRESS in Avaniyapuram, Madurai. Explore our
@@ -115,7 +118,9 @@ export default async function Home() {
         <div className="section-heading">
           <div>
             <p className="eyebrow">SOMETHING FOR EVERY CRAVING</p>
-            <h2>Good food. Your way.</h2>
+            <h2>
+              <AnimatedText text="Good food. Your way." />
+            </h2>
           </div>
           <Link className="text-link" href="/menu">
             Explore our menu ↗
@@ -141,7 +146,9 @@ export default async function Home() {
           <div className="section-heading">
             <div>
               <p className="eyebrow">{demo ? 'A PREVIEW OF THE POSSIBILITIES' : 'FROM OUR MENU'}</p>
-              <h2>{demo ? 'Meet the menu preview.' : 'In the spotlight.'}</h2>
+              <h2>
+                <AnimatedText text={demo ? 'Meet the menu preview.' : 'In the spotlight.'} />
+              </h2>
             </div>
             <span className="muted">
               {demo ? 'Provisional dishes · confirmation pending' : 'Selected by our restaurant'}
@@ -189,7 +196,9 @@ export default async function Home() {
         <div className="section-heading">
           <div>
             <p className="eyebrow">A LITTLE LOOK AROUND</p>
-            <h2>Feast your eyes.</h2>
+            <h2>
+              <AnimatedText text="Feast your eyes." />
+            </h2>
           </div>
           <Link href="/gallery" className="text-link">
             View gallery ↗

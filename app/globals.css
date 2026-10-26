@@ -1539,6 +1539,10 @@ footer a {
     font-size: 19px;
   }
 }
+.animated-word {
+  display: inline-block;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .photo-steam {
     display: none;

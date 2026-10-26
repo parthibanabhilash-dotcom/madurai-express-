@@ -12,7 +12,25 @@ export function Reveals() {
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            if (!motion.matches && entry.target.animate) {
+            if (!motion.matches && entry.target.matches('[data-text-reveal]')) {
+              entry.target.querySelectorAll('.animated-word').forEach((word, index) => {
+                if (!word.animate) return;
+                const animation = word.animate(
+                  [
+                    { opacity: 0, transform: 'translateY(.45em)' },
+                    { opacity: 1, transform: 'translateY(0)' },
+                  ],
+                  {
+                    duration: 340,
+                    delay: Math.min(index, 4) * 40,
+                    easing: 'cubic-bezier(.2,.7,.2,1)',
+                    fill: 'backwards',
+                  },
+                );
+                animations.add(animation);
+                animation.finished.then(() => animations.delete(animation)).catch(() => {});
+              });
+            } else if (!motion.matches && entry.target.animate) {
               const siblings = Array.from(entry.target.parentElement?.children ?? []);
               const index = siblings.indexOf(entry.target);
               const stagger = entry.target.matches(
@@ -44,7 +62,7 @@ export function Reveals() {
     const scan = () =>
       document
         .querySelectorAll(
-          '.section-heading,.story-art,.story-copy,.contact-card,.page-intro,.hero-copy,.hero-visual,.dish-card,.category,.gallery-tile,.gallery-grid>a,.visit>div,[data-scroll-reveal]',
+          '.section-heading,.story-art,.story-copy,.contact-card,.page-intro,.hero-copy,.hero-visual,.dish-card,.category,.gallery-tile,.gallery-grid>a,.visit>div,[data-scroll-reveal],[data-text-reveal],#main .eyebrow',
         )
         .forEach((el) => {
           if (!observed.has(el)) {

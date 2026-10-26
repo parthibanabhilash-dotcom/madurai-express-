@@ -5,6 +5,7 @@ import { render, screen, fireEvent, cleanup, waitFor, act } from '@testing-libra
 import { Header, MenuBrowser, Gallery, FoodPhoto, DishCard } from '../components/site';
 import { BrandArtwork, BrandBanner } from '../components/brand-art';
 import { Reveals } from '../components/reveals';
+import { AnimatedText } from '../components/animated-text';
 import { defaultSettings, demoDishes, categories } from '../lib/content';
 it('labels an explicitly selected illustrative photo on a published dish', () => {
   render(<DishCard dish={{ ...demoDishes[0], demo: false, imageId: 'illustrative-biryani' }} />);
@@ -181,6 +182,35 @@ describe('motion and supplied artwork', () => {
       '/madurai-express-banner.png',
     );
     expect(container.querySelector('.photo-steam')).toBeNull();
+  });
+  it('staggers heading words while preserving readable text and cancelling reduced motion', () => {
+    const viewport = viewportMock();
+    const { container } = render(
+      <main id="main">
+        <h1>
+          <AnimatedText text="Madurai flavours. Full-on taste." />
+        </h1>
+        <Reveals />
+      </main>,
+    );
+    expect(screen.getByRole('heading').textContent).toBe('Madurai flavours. Full-on taste.');
+    const cancel = vi.fn();
+    const animate = vi.fn(
+      (
+        _frames: Keyframe[] | PropertyIndexedKeyframes | null,
+        _options?: number | KeyframeAnimationOptions,
+      ) => ({ finished: new Promise(() => {}), cancel }) as unknown as Animation,
+    );
+    container.querySelectorAll('.animated-word').forEach((word) => {
+      word.animate = animate;
+    });
+    const target = container.querySelector('[data-text-reveal]')!;
+    viewport.enter([{ target, isIntersecting: true }]);
+    expect(animate).toHaveBeenCalledTimes(4);
+    expect(animate.mock.calls[3][1]).toMatchObject({ duration: 340, delay: 120 });
+    viewport.motion.matches = true;
+    act(() => viewport.motion.addEventListener.mock.calls[0][1]());
+    expect(cancel).toHaveBeenCalledTimes(4);
   });
   it('reveals sections on entry, observes newly filtered cards, and cancels for reduced motion', async () => {
     const viewport = viewportMock();
