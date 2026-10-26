@@ -249,6 +249,57 @@ describe.skipIf(!enabled)('PostgreSQL-backed admin workflows', () => {
       }
     },
   );
+  it.skipIf(process.env.TEST_S3 !== 'true')(
+    'uploads a device photo directly with a dish and preserves it on later saves',
+    async () => {
+      const sharp = (await import('sharp')).default;
+      const storage = await import('../lib/storage');
+      const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
+      const bytes = await sharp({
+        create: { width: 180, height: 180, channels: 3, background: 'red' },
+      })
+        .png()
+        .toBuffer();
+      const fields = { name: 'Device upload test', description: '', categoryId, kind: 'VEG' };
+      const f = form('item', fields);
+      f.set('dishPhoto', new File([new Uint8Array(bytes)], 'dish.png', { type: 'image/png' }));
+      expect((await actions.mutate({}, f)).success).toBeTruthy();
+      const item = await db.menuItem.findFirstOrThrow({ where: { name: fields.name, categoryId } });
+      const image = await db.image.findUniqueOrThrow({ where: { id: item.imageId! } });
+      try {
+        expect(image.alt).toBe(fields.name);
+        expect(image.gallery).toBe(false);
+        const object = await storage.readImage(image.key);
+        expect((await sharp(await object.Body!.transformToByteArray()).metadata()).format).toBe(
+          'webp',
+        );
+        const bad = form('item', {
+          ...fields,
+          id: item.id,
+          imageId: image.id,
+          name: 'Should not save',
+        });
+        bad.set('dishPhoto', new File(['bad'], 'bad.png', { type: 'image/png' }));
+        expect((await actions.mutate({}, bad)).error).toContain('Invalid image');
+        expect((await db.menuItem.findUniqueOrThrow({ where: { id: item.id } })).name).toBe(
+          fields.name,
+        );
+        expect(
+          (await actions.mutate({}, form('item', { ...fields, id: item.id, imageId: image.id })))
+            .success,
+        ).toBeTruthy();
+        expect((await db.menuItem.findUniqueOrThrow({ where: { id: item.id } })).imageId).toBe(
+          image.id,
+        );
+      } finally {
+        await db.menuItem.delete({ where: { id: item.id } });
+        await db.image.delete({ where: { id: image.id } });
+        await storage
+          .s3()
+          .send(new DeleteObjectCommand({ Bucket: storage.bucket(), Key: image.key }));
+      }
+    },
+  );
   it('authenticates, creates opaque session, logs out and rejects expired session', async () => {
     runtime.cookies.set('mm_login_csrf', 'login-csrf');
     const f = form('', { email, password, csrf: 'login-csrf' });

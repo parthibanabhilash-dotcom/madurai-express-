@@ -66,6 +66,8 @@ Drafts without photos receive one of the three bundled licensed illustrative sto
 
 ## Image storage and production configuration
 
+In Admin → Menu, each dish form includes “Upload dish photo from your device”. Choose a local JPEG/PNG/WebP (up to 4 MB), check the preview, then Save changes. The new photo overrides the existing image selection and is attached to the dish automatically. Empty uploads preserve the existing selection. Uploaded dish photos stay out of the gallery unless explicitly enabled later. Production uploads require the S3 settings below; image records and dish changes are saved together only after the upload succeeds.
+
 Local MinIO runs at http://localhost:9000, with its console at http://localhost:9001. `storage:setup` creates the configured private bucket. Configure `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY` and `S3_SECRET_KEY` for your durable S3-compatible provider. Use a dedicated least-privilege storage identity with object read/write permissions for this bucket. The setup command additionally needs bucket creation/check access; pre-create the bucket if using a restricted runtime identity.
 
 Set `DATABASE_URL` to PostgreSQL, `APP_URL` to the exact HTTPS application origin, and `NEXT_PUBLIC_SITE_URL` to the final canonical domain. Run migrations before starting the application. Use `npm run build` followed by `npm start`. Production requires HTTPS because session cookies are secure. Keep database connections and storage credentials server-side. Back up both PostgreSQL and the image bucket. No internal cart, payments, reservations or delivery tracking are included.

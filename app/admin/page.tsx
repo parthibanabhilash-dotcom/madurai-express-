@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { requireAdmin } from '@/lib/auth';
 import { defaultSettings } from '@/lib/content';
 import { AdminForm } from '@/components/admin-form';
+import { MenuImageUpload } from '@/components/menu-image-upload';
 const check = (name: string, label: string, value = false) => (
   <label className="check">
     <input type="checkbox" name={name} defaultChecked={value} />
@@ -141,7 +142,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                       </select>
                     </label>
                     <label>
-                      Image
+                      Choose an existing image
                       <select name="imageId" defaultValue={item?.imageId ?? ''}>
                         <option value="">No image</option>
                         {images.map((im) => (
@@ -151,6 +152,9 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                         ))}
                       </select>
                     </label>
+                    <MenuImageUpload
+                      currentSrc={item?.imageId ? '/api/images/' + item.imageId : undefined}
+                    />
                     <label>
                       Confirmed price (INR, blank = enquire)
                       <input

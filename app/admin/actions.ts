@@ -90,8 +90,34 @@ export async function mutate(_: Result, form: FormData): Promise<Result> {
       });
       if (data.imageId && !(await db.image.findUnique({ where: { id: data.imageId } })))
         throw new InputError('Image not found');
-      if (id) await db.menuItem.update({ where: { id }, data });
-      else await db.menuItem.create({ data });
+      if (!(await db.category.findUnique({ where: { id: data.categoryId } })))
+        throw new InputError('Category not found');
+      if (id && !(await db.menuItem.findUnique({ where: { id } })))
+        throw new InputError('Menu item not found');
+      const photo = form.get('dishPhoto');
+      let key: string | undefined;
+      if (photo instanceof File && photo.size > 0) {
+        if (photo.size > 4 * 1024 * 1024)
+          throw new InputError('Choose a dish photo smaller than 4 MB.');
+        try {
+          key = await uploadImage(photo);
+        } catch (error) {
+          if (error instanceof InputError) throw error;
+          throw new InputError(
+            'Photo upload failed. Check the S3 image-storage settings and try again. Your dish was not changed.',
+          );
+        }
+      }
+      await db.$transaction(async (tx) => {
+        if (key) {
+          const image = await tx.image.create({
+            data: { key, alt: data.name, group: 'Food', gallery: false },
+          });
+          data.imageId = image.id;
+        }
+        if (id) await tx.menuItem.update({ where: { id }, data });
+        else await tx.menuItem.create({ data });
+      });
     } else if (action === 'delete-item') await db.menuItem.delete({ where: { id } });
     else if (action === 'offer') {
       const data = {
