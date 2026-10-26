@@ -1,3 +1,4 @@
+import { suggestedMenu } from './suggested-menu';
 export const categories = [
   'Biryani',
   'Bucket Biryani',
@@ -46,30 +47,40 @@ export type Dish = {
   imageId: string | null;
   demo: boolean;
 };
-export const demoDishes: Dish[] = [
-  'Mutton Biryani',
-  'Egg Biryani',
-  'Chicken Bucket Biryani',
-  'Parotta Combo',
-  'Chicken Kari Dosai',
-  'Mutton Kari Dosai',
-  'Mutton Chukka',
-  'Garlic Chicken Gravy',
-].map((name, i) => ({
-  id: `demo-${i}`,
-  name,
-  description: 'Provisional dish · owner confirmation required',
-  category: {
-    id: categories[[0, 0, 1, 2, 3, 3, 4, 4][i]],
-    name: categories[[0, 0, 1, 2, 3, 3, 4, 4][i]],
-  },
-  price: null,
-  kind: 'NON_VEG',
-  available: false,
-  featured: i < 3,
-  imageId: null,
-  demo: true,
-}));
+// Preserve the existing draft identifiers so re-seeding never duplicates or overwrites edits.
+const legacyDemoIds: Record<string, string> = {
+  'Mutton Biryani': 'demo-0',
+  'Egg Biryani': 'demo-1',
+  'Chicken Bucket Biryani': 'demo-2',
+  'Parotta Combo': 'demo-3',
+  'Chicken Kari Dosai': 'demo-4',
+  'Mutton Kari Dosai': 'demo-5',
+  'Mutton Chukka': 'demo-6',
+  'Garlic Chicken Gravy': 'demo-7',
+};
+const slug = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+export const demoDishes: Dish[] = categories.flatMap((category) =>
+  suggestedMenu[category].map(([name, kind]) => {
+    const id = legacyDemoIds[name] ?? `demo-${slug(category)}-${slug(name)}`;
+    return {
+      id,
+      name,
+      description:
+        'Suggested example only. Menu, classification and availability need owner confirmation.',
+      category: { id: category, name: category },
+      price: null,
+      kind,
+      available: false,
+      featured: ['demo-0', 'demo-1', 'demo-2'].includes(id),
+      imageId: null,
+      demo: true,
+    };
+  }),
+);
 export function filterDishes(items: Dish[], query: string, category: string, kind: string) {
   return items.filter(
     (x) =>

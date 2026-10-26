@@ -227,7 +227,9 @@ export function DishCard({ dish }: { dish: Dish }) {
             : dish.demo
               ? dish.category.name === 'Dosai'
                 ? stock.dosa
-                : stock.hero
+                : dish.category.name === 'South Indian'
+                  ? stock.meal
+                  : stock.hero
               : '/placeholder.svg'
         }
         alt={dish.demo ? 'Stock food photograph — not the restaurant’s dish' : dish.name}

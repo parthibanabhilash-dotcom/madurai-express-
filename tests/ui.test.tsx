@@ -76,11 +76,11 @@ describe('public interactions', () => {
       />,
     );
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'mutton' } });
-    expect(screen.getByText('3 dishes to explore')).toBeTruthy();
+    expect(screen.getByText('6 dishes to explore')).toBeTruthy();
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'VEG' } });
     expect(screen.getByText('No dishes found')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Reset filters' }));
-    expect(screen.getByText('8 dishes to explore')).toBeTruthy();
+    expect(screen.getByText('60 dishes to explore')).toBeTruthy();
   });
   it('enlarges gallery images, navigates with keyboard and closes with focus restored', async () => {
     HTMLDialogElement.prototype.showModal = function () {

@@ -12,20 +12,20 @@ async function main() {
       create: {
         id: d.id,
         name: d.name,
-        description: 'Owner confirmation required.',
+        description: d.description,
         categoryId: category.id,
         price: null,
         available: false,
         featured: false,
         published: false,
         demo: true,
-        kind: 'NON_VEG',
+        kind: d.kind,
       },
       update: {},
     });
   }
   console.log(
-    'Seeded categories, business settings and eight provisional DRAFT dishes. No verified menu or prices added.',
+    `Seeded ${categories.length} categories and ${demoDishes.length} suggested DRAFT dishes (10 per category). Existing records preserved. No verified menu or prices added.`,
   );
 }
 main().finally(() => db.$disconnect());

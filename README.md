@@ -46,7 +46,7 @@ Opening hours remain unconfigured until confirmed. In Settings, enable “Hours 
 
 ## Demonstration content
 
-`db:seed` creates business defaults, six categories and eight **draft, unconfirmed, demo** dish records. It never adds prices, availability, approved photography, hours or offers. It does not overwrite existing records.
+`db:seed` creates business defaults, six categories and **60 draft, unconfirmed, demo dishes: 10 per category**. Suggested names and classifications are examples pending owner confirmation. It never adds prices, availability, approved photography, hours or offers. Stable identifiers preserve the original eight draft records and avoid duplicates on repeat runs. Existing records, including owner edits, are not overwritten. The expanded catalog is visible only in the explicitly labelled local demo or as drafts in the database/admin; it is not a published restaurant menu.
 
 `DEMO_PREVIEW=true` enables clearly labelled demonstration content only when `NODE_ENV` is not `production`. If no published menu exists, the local preview displays provisional dishes; it is not a verified restaurant menu. The demo flag cannot be published by server validation. Convert a draft to a real item only after owner confirmation, clear its demo flag, confirm its classification and availability, then publish it. Production contains no stock-photo fallback and no demo items, even if `DEMO_PREVIEW=true` was accidentally retained. Production database failures show a clear live-menu notice and known contact/location information; they never enable demonstration content.
 

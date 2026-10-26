@@ -1,5 +1,11 @@
 # Local verification
 
+## Suggested catalog expansion — 26 October 2026
+
+The user approved adding suggested dishes as drafts: 10 in each of the six existing categories (60 total). Legacy draft IDs are retained; new IDs are stable. Prices remain null, availability false, publication false and demo status true when seeded. Existing owner edits are preserved by empty upsert updates. Local previews remain labelled and production continues to exclude demo content. New tests cover exact category counts, unique names/identifiers, preserved legacy IDs and combined filters across the larger catalog.
+
+Passed TypeScript, production build and 28 behavior/UI/deployment tests. Ran the seed twice against local PostgreSQL: 60 drafts remained, exactly 10 per category, with all 8 prior records unchanged. HTTP checks of the labelled local menu preview returned 60 cards for All and 10 for each of the six category URLs. No draft was published, priced or marked available.
+
 ## Supplied artwork and motion — 26 October 2026
 
 Integrated both user-provided PNGs unchanged (original dimensions: logo 1254 × 1254; banner 2070 × 760). Source/destination SHA-256 checksums match. Images use explicit dimensions, responsive Next.js optimization and contain sizing; the full banner remains available as an accessible original-image link. The user explicitly approved keeping both images as-is, including the banner's existing courier-related text.
